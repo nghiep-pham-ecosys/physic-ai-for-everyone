@@ -1,0 +1,15 @@
+# ROS 2 / colcon
+build/
+install/
+log/
+
+# Node / Astro
+node_modules/
+dist/
+.astro/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Environment files
+.env*
