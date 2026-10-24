@@ -1,0 +1,42 @@
+name: ci-ros
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-ros-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Build the PAI-17 devcontainer image; layers are cached in the GitHub Actions cache.
+      - name: Build dev image (cached)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          tags: pai-dev:cpu
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Run as the runner's UID so build artifacts on the bind mount stay writable.
+      - name: just build && just test (headless)
+        run: >
+          docker run --rm
+          --user "$(id -u):$(id -g)" -e HOME=/tmp
+          -v "${{ github.workspace }}:/workspace" -w /workspace
+          pai-dev:cpu
+          bash -c "just build && just test"
