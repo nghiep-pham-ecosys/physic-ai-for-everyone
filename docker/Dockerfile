@@ -7,8 +7,9 @@
 # Not pinned (the ROS and Ubuntu apt repositories keep only current versions):
 #   - ROS / Gazebo apt packages and just; the PR records the installed versions.
 
-# ros:jazzy-ros-base, resolved 2026-10-24
-FROM ros:jazzy-ros-base@sha256:103b6c417973394659af6804d4917cd489b91e5ed22eb7bef263025a3bed2410
+# ros:jazzy-ros-base, resolved 2026-10-24. Digest-only form: the Dev Containers
+# CLI cannot parse "name:tag@digest" references.
+FROM ros@sha256:103b6c417973394659af6804d4917cd489b91e5ed22eb7bef263025a3bed2410
 
 ARG TARGETARCH
 ARG USERNAME=ubuntu
