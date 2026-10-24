@@ -30,9 +30,28 @@ lessons yet.
 | `CLAUDE.md` | Working rules for the Claude Code assistant |
 | `.github/` | Pull request and issue templates |
 
-### Quickstart
+### Setup
 
-Coming in PAI-17.
+The development environment is a Docker image with ROS 2 Jazzy, Gazebo
+Harmonic (via `ros_gz`), `just` and Node.js LTS. It needs only a CPU.
+
+1. Install [Docker](https://docs.docker.com/get-started/get-docker/) and
+   [VS Code](https://code.visualstudio.com/) with the
+   [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+   extension. On Windows, use WSL 2 and enable Docker Desktop's WSL integration.
+2. Clone this repository and open it in VS Code.
+3. Run **Dev Containers: Reopen in Container**. The first build downloads the
+   base image and takes a while.
+4. In the container terminal, check the environment:
+
+   ```bash
+   printenv ROS_DISTRO   # jazzy
+   ros2 pkg list
+   gz sim --version
+   ```
+
+The repository is mounted at `/workspace`. Without VS Code, build the image
+with `docker build -f docker/Dockerfile -t pai-dev:cpu .`.
 
 ### Licenses
 
@@ -70,9 +89,28 @@ tài liệu Astro Starlight.
 | `CLAUDE.md` | Quy tắc làm việc cho trợ lý Claude Code |
 | `.github/` | Mẫu pull request và issue |
 
-### Bắt đầu nhanh
+### Cài đặt
 
-Sẽ có trong PAI-17.
+Môi trường phát triển là một Docker image có sẵn ROS 2 Jazzy, Gazebo Harmonic
+(qua `ros_gz`), `just` và Node.js LTS. Chỉ cần CPU.
+
+1. Cài [Docker](https://docs.docker.com/get-started/get-docker/) và
+   [VS Code](https://code.visualstudio.com/) kèm extension
+   [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+   Trên Windows, dùng WSL 2 và bật WSL integration trong Docker Desktop.
+2. Clone repo này và mở bằng VS Code.
+3. Chạy **Dev Containers: Reopen in Container**. Lần build đầu phải tải image
+   gốc nên sẽ mất một lúc.
+4. Trong terminal của container, kiểm tra môi trường:
+
+   ```bash
+   printenv ROS_DISTRO   # jazzy
+   ros2 pkg list
+   gz sim --version
+   ```
+
+Repo được mount tại `/workspace`. Nếu không dùng VS Code, build image bằng
+`docker build -f docker/Dockerfile -t pai-dev:cpu .`.
 
 ### Giấy phép
 
