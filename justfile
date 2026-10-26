@@ -34,3 +34,11 @@ lesson NN:
 # Remove colcon build, install and log directories
 clean:
     rm -rf {{ws}}/build {{ws}}/install {{ws}}/log
+
+# Run the Starlight site dev server (http://localhost:4321)
+site-dev:
+    cd site && ([ -d node_modules ] || npm ci) && npm run dev -- --host
+
+# Build the Starlight site; fails on broken internal links
+site-build:
+    cd site && npm ci && npm run build

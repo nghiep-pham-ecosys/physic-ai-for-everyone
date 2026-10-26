@@ -1,0 +1,34 @@
+name: ci-site
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-site-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same Node.js version as the devcontainer image (docker/Dockerfile).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.22.1
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install just
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends just
+
+      # starlight-links-validator fails the build on broken internal links.
+      - name: just site-build
+        run: just site-build
