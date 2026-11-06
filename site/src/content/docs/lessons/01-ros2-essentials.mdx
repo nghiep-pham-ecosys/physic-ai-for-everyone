@@ -1,0 +1,161 @@
+---
+title: 'Lesson 01: ROS 2 essentials'
+description: Nodes, topics, services, parameters, launch files and colcon, with a working publisher and subscriber.
+---
+
+import { Code } from '@astrojs/starlight/components';
+import heartbeat from '../../../../../ros2_ws/src/pai_basics/pai_basics/heartbeat.py?raw';
+import monitor from '../../../../../ros2_ws/src/pai_basics/pai_basics/monitor.py?raw';
+import launchFile from '../../../../../ros2_ws/src/pai_basics/launch/heartbeat.launch.py?raw';
+
+**After this lesson you can** explain nodes, topics, services and parameters; build a workspace with colcon; write a publisher and a subscriber in Python; start them with a launch file; and test them without a GUI.
+
+**You need** basic Python and Linux shell, and the devcontainer from [Setup](/start-here/setup/). No GPU.
+
+## Theory
+
+A robot program in ROS 2 is not one big program. It is a set of small programs that talk to each other, called the ROS graph.
+
+**Nodes.** A node is a participant in the graph. Each node should do one logical thing, and nodes can run in the same process, in different processes, or on different machines. ([Nodes](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Nodes.html))
+
+**Topics.** Topics are for continuous data streams, such as sensor data or robot state. Publishers send data to a named topic and subscribers receive it. A topic can have zero or more of each, and a subscriber generally does not know which publisher sent a message. Topics are also strongly typed: every message on a topic has a defined type. ([Topics](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Topics.html))
+
+**Services.** A service is a remote procedure call: a client sends a request and a server returns a result. Services are expected to return quickly. Long-running work belongs in an action. There should be only one server per service name. ([Services](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Services.html))
+
+**Parameters.** A parameter is a setting that belongs to one node. It configures the node at startup or at runtime without changing the code. By default, a node must declare each parameter it accepts. ([Parameters](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Parameters.html))
+
+**Launch files.** The launch system lets you describe the configuration of your system, such as which programs to run and with which settings, and then starts it as described. ([Creating a launch file](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Launch/Creating-Launch-Files.html))
+
+**Workspace and colcon.** A workspace is a directory with a `src` folder for package source code. `colcon build` creates `build`, `install` and `log` next to it. Your workspace is an overlay on top of the ROS 2 installation, the underlay, so you source the underlay first. ([Using colcon](https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Colcon-Tutorial.html))
+
+**Domain ID.** Nodes on the same domain can discover each other, and nodes on different domains cannot. The default domain is 0. ([ROS_DOMAIN_ID](https://docs.ros.org/en/jazzy/Concepts/Intermediate/About-Domain-ID.html))
+
+## Terminology
+
+| Term | Meaning |
+| --- | --- |
+| Node | One program with one job in the ROS graph |
+| Topic | A named channel for a continuous stream of messages |
+| Publisher / Subscriber | The sender and the receiver on a topic |
+| Message | One typed piece of data, such as `std_msgs/msg/UInt32` |
+| Service | A request that gets one reply |
+| Parameter | A named setting that belongs to one node |
+| Launch file | A description of which nodes to start, and how |
+| Workspace | A folder with your packages, built by colcon |
+| Package | The unit that holds code and is built and installed |
+| Source (verb) | Load an environment script into your shell |
+
+## Plain-language explanation
+
+Think of a hospital ward.
+
+- A **node** is one member of staff with one job.
+- A **topic** is the heart monitor. It keeps beeping, whether or not anybody is watching. Anyone can start watching without disturbing it.
+- A **service** is asking a nurse a question. You ask once, you wait, and you get one answer.
+- A **parameter** is a setting on the machine, such as how often it measures.
+- A **launch file** is the checklist that starts the whole ward at once.
+
+Our example does exactly this. `heartbeat` keeps sending a number that goes up by one. `monitor` watches the numbers. If one is skipped, a beat was lost, so it writes a warning. You can ask `monitor` for its counts at any time through a service.
+
+Why not one big program? If the camera code crashes, the wheels can keep working. You can also swap one part without touching the others.
+
+## Hands-on
+
+### 1. Run the finished system
+
+Open the repository in the devcontainer, then run:
+
+```bash
+just lesson 01
+```
+
+This builds the workspace and runs four checks. You should see:
+
+```text
+--- 1/4 nodes
+/heartbeat
+/monitor
+--- 2/4 topic
+data: 6
+---
+--- 3/4 parameter
+Double value is: 5.0
+--- 4/4 service
+waiting for service to become available...
+requester: making request: std_srvs.srv.Trigger_Request()
+
+response:
+std_srvs.srv.Trigger_Response(success=True, message='received=16 missed=0')
+
+PASS: lesson 01
+```
+
+The numbers in `data` and `received` depend on timing, so yours will differ. `missed=0` means that no beat was lost.
+
+### 2. Read the publisher
+
+<Code code={heartbeat} lang="python" title="ros2_ws/src/pai_basics/pai_basics/heartbeat.py" />
+
+Three lines do most of the work:
+
+- `declare_parameter` announces `rate_hz`, with 2.0 as the default.
+- `create_publisher` opens the topic. The type is `UInt32`, the name is `heartbeat`, and `10` is the queue size: a limit on messages waiting if a subscriber is slow. ([publisher tutorial](https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html))
+- `create_timer` calls `_beat` at a fixed period, which is one divided by the rate.
+
+`rclpy.spin(node)` keeps the program alive and runs those callbacks.
+
+### 3. Read the subscriber
+
+<Code code={monitor} lang="python" title="ros2_ws/src/pai_basics/pai_basics/monitor.py" />
+
+`create_subscription` uses the same type and name as the publisher, which is how the two connect. Neither node mentions the other.
+
+The name `~/reset` starts with `~`, so it expands to the node's own name: `/monitor/reset`. The gap counting lives in `beat_tracker.py`, without any ROS code, so it can be tested alone.
+
+### 4. Read the launch file
+
+<Code code={launchFile} lang="python" title="ros2_ws/src/pai_basics/launch/heartbeat.launch.py" />
+
+Launch arguments are text, so `ParameterValue` converts `rate_hz` to a number before the node receives it.
+
+### 5. Look inside by hand
+
+Start the system in one terminal:
+
+```bash
+source ros2_ws/install/setup.bash
+ros2 launch pai_basics heartbeat.launch.py rate_hz:=10.0
+```
+
+In a second terminal, ask ROS what is running:
+
+```bash
+source ros2_ws/install/setup.bash
+ros2 node list
+ros2 topic info /heartbeat
+ros2 topic hz /heartbeat
+ros2 param get /heartbeat rate_hz
+ros2 service call /monitor/reset std_srvs/srv/Trigger
+```
+
+`ros2 topic info` should show `Publisher count: 1` and `Subscription count: 1`, and `ros2 topic hz` about 10. Press Ctrl+C to stop.
+
+### 6. Run the tests
+
+```bash
+just test
+```
+
+The package has three kinds of test: lint checks, unit tests of the gap counting, and a test that starts the real launch file and talks to both nodes. The last one uses its own domain ID, so other ROS 2 programs on your machine cannot disturb it.
+
+### Exercises
+
+Four exercises are in `lessons/01-ros2-essentials/exercises.md`, with answers in `solutions.md`. In one of them, a parameter change reports success and yet changes nothing. Try to work out why before reading the answer.
+
+## Common problems
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `Package 'pai_basics' not found` | The workspace is not sourced in this terminal | `source ros2_ws/install/setup.bash` |
+| `ros2 topic hz` waits forever | Terminals use different `ROS_DOMAIN_ID` values | Use the same value in both |
+| `Node not found` straight after starting | Discovery has not finished | Wait a moment and try again |

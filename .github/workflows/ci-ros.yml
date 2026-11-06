@@ -33,10 +33,10 @@ jobs:
           cache-to: type=gha,mode=max
 
       # Run as the runner's UID so build artifacts on the bind mount stay writable.
-      - name: just build && just test (headless)
+      - name: just build, just test, lessons (headless)
         run: >
           docker run --rm
           --user "$(id -u):$(id -g)" -e HOME=/tmp
           -v "${{ github.workspace }}:/workspace" -w /workspace
           pai-dev:cpu
-          bash -c "just build && just test"
+          bash -c "just build && just test && just lesson 01"

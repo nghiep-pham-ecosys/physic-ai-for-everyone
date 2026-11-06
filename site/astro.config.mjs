@@ -15,12 +15,17 @@ export default defineConfig({
       },
       // Fails the build on broken internal links.
       plugins: [starlightLinksValidator()],
-      // Architecture §5. The Lessons group is added when it has pages.
+      // Architecture §5: one Lessons group per phase.
       sidebar: [
         {
           label: 'Start here',
           translations: { vi: 'Bắt đầu' },
           items: ['start-here/about', 'start-here/setup', 'start-here/how-to-use'],
+        },
+        {
+          label: 'P1: Robot Body',
+          translations: { vi: 'P1: Thân robot' },
+          items: ['lessons/01-ros2-essentials'],
         },
         {
           label: 'Reference',

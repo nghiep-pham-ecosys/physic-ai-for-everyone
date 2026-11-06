@@ -1,0 +1,161 @@
+---
+title: 'Bài 01: Nền tảng ROS 2'
+description: Node, topic, service, parameter, launch file và colcon, kèm publisher và subscriber chạy được.
+---
+
+import { Code } from '@astrojs/starlight/components';
+import heartbeat from '../../../../../../ros2_ws/src/pai_basics/pai_basics/heartbeat.py?raw';
+import monitor from '../../../../../../ros2_ws/src/pai_basics/pai_basics/monitor.py?raw';
+import launchFile from '../../../../../../ros2_ws/src/pai_basics/launch/heartbeat.launch.py?raw';
+
+**Sau bài này bạn có thể** giải thích node, topic, service và parameter; build workspace bằng colcon; viết publisher và subscriber bằng Python; khởi động chúng bằng launch file; và kiểm thử không cần GUI.
+
+**Bạn cần** biết Python và Linux shell cơ bản, cùng devcontainer ở trang [Cài đặt](/vi/start-here/setup/). Không cần GPU.
+
+## Lý thuyết
+
+Chương trình robot trong ROS 2 không phải một chương trình lớn. Đó là tập hợp nhiều chương trình nhỏ nói chuyện với nhau, gọi là ROS graph.
+
+**Node.** Node là một thành viên trong graph. Mỗi node nên làm một việc logic, và các node có thể chạy trong cùng tiến trình, khác tiến trình, hoặc trên máy khác. ([Nodes](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Nodes.html))
+
+**Topic.** Topic dùng cho luồng dữ liệu liên tục, như dữ liệu cảm biến hay trạng thái robot. Publisher gửi dữ liệu lên một topic có tên và subscriber nhận dữ liệu đó. Mỗi bên có thể có từ không đến nhiều thành viên, và subscriber thường không biết publisher nào đã gửi message. Topic cũng có kiểu chặt chẽ: mọi message trên một topic đều có kiểu đã định nghĩa. ([Topics](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Topics.html))
+
+**Service.** Service là lời gọi thủ tục từ xa: client gửi yêu cầu và server trả về kết quả. Service phải trả lời nhanh. Công việc chạy lâu thuộc về action. Mỗi tên service chỉ nên có một server. ([Services](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Services.html))
+
+**Parameter.** Parameter là thiết lập thuộc về một node. Nó cấu hình node lúc khởi động hoặc lúc đang chạy mà không cần sửa code. Theo mặc định, node phải khai báo từng parameter mà nó chấp nhận. ([Parameters](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Parameters.html))
+
+**Launch file.** Hệ thống launch cho phép mô tả cấu hình hệ thống, như chạy chương trình nào với thiết lập nào, rồi khởi động đúng như mô tả. ([Creating a launch file](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Launch/Creating-Launch-Files.html))
+
+**Workspace và colcon.** Workspace là thư mục có thư mục con `src` chứa mã nguồn các package. `colcon build` tạo ra `build`, `install` và `log` bên cạnh đó. Workspace của bạn là overlay nằm trên bản cài ROS 2, gọi là underlay, nên phải source underlay trước. ([Using colcon](https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Colcon-Tutorial.html))
+
+**Domain ID.** Các node cùng domain tìm thấy nhau, các node khác domain thì không. Domain mặc định là 0. ([ROS_DOMAIN_ID](https://docs.ros.org/en/jazzy/Concepts/Intermediate/About-Domain-ID.html))
+
+## Thuật ngữ
+
+| Thuật ngữ | Ý nghĩa |
+| --- | --- |
+| Node | Một chương trình làm một việc trong ROS graph |
+| Topic | Kênh có tên cho luồng message liên tục |
+| Publisher / Subscriber | Bên gửi và bên nhận trên một topic |
+| Message | Một gói dữ liệu có kiểu, ví dụ `std_msgs/msg/UInt32` |
+| Service | Yêu cầu nhận về một câu trả lời |
+| Parameter | Thiết lập có tên, thuộc về một node |
+| Launch file | Bản mô tả khởi động node nào và như thế nào |
+| Workspace | Thư mục chứa các package, được build bằng colcon |
+| Package | Đơn vị chứa code, được build và cài đặt |
+| Source (động từ) | Nạp script môi trường vào shell |
+
+## Giải thích dễ hiểu
+
+Hãy nghĩ đến một khoa trong bệnh viện.
+
+- **Node** là một nhân viên làm một việc.
+- **Topic** là máy theo dõi nhịp tim. Máy cứ kêu đều, dù có ai xem hay không. Ai cũng có thể bắt đầu xem mà không làm phiền máy.
+- **Service** là hỏi y tá một câu. Bạn hỏi một lần, chờ, và nhận một câu trả lời.
+- **Parameter** là một nút chỉnh trên máy, ví dụ bao lâu đo một lần.
+- **Launch file** là danh sách việc để khởi động cả khoa một lượt.
+
+Ví dụ của chúng ta làm đúng như vậy. `heartbeat` liên tục gửi một số tăng dần. `monitor` theo dõi các số đó. Nếu thấy thiếu số, nghĩa là mất một nhịp, nó ghi cảnh báo. Bạn có thể hỏi `monitor` số liệu đếm bất cứ lúc nào qua service.
+
+Vì sao không viết một chương trình lớn? Nếu phần camera bị lỗi, bánh xe vẫn có thể chạy tiếp. Bạn cũng thay được một phần mà không đụng đến phần khác.
+
+## Thực hành
+
+### 1. Chạy hệ thống hoàn chỉnh
+
+Mở repo trong devcontainer rồi chạy:
+
+```bash
+just lesson 01
+```
+
+Lệnh này build workspace và chạy bốn bước kiểm tra. Bạn sẽ thấy:
+
+```text
+--- 1/4 nodes
+/heartbeat
+/monitor
+--- 2/4 topic
+data: 6
+---
+--- 3/4 parameter
+Double value is: 5.0
+--- 4/4 service
+waiting for service to become available...
+requester: making request: std_srvs.srv.Trigger_Request()
+
+response:
+std_srvs.srv.Trigger_Response(success=True, message='received=16 missed=0')
+
+PASS: lesson 01
+```
+
+Các số ở `data` và `received` phụ thuộc thời gian nên của bạn sẽ khác. `missed=0` nghĩa là không mất nhịp nào.
+
+### 2. Đọc publisher
+
+<Code code={heartbeat} lang="python" title="ros2_ws/src/pai_basics/pai_basics/heartbeat.py" />
+
+Ba dòng làm phần lớn công việc:
+
+- `declare_parameter` khai báo `rate_hz`, mặc định là 2.0.
+- `create_publisher` mở topic. Kiểu là `UInt32`, tên là `heartbeat`, còn `10` là kích thước hàng đợi: giới hạn số message chờ khi subscriber chậm. ([hướng dẫn publisher](https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html))
+- `create_timer` gọi `_beat` theo chu kỳ cố định, bằng một chia cho tốc độ.
+
+`rclpy.spin(node)` giữ chương trình chạy và thực thi các callback đó.
+
+### 3. Đọc subscriber
+
+<Code code={monitor} lang="python" title="ros2_ws/src/pai_basics/pai_basics/monitor.py" />
+
+`create_subscription` dùng cùng kiểu và cùng tên với publisher, nhờ đó hai bên kết nối được. Không node nào nhắc đến node kia.
+
+Tên `~/reset` bắt đầu bằng `~` nên được mở rộng thành tên của chính node: `/monitor/reset`. Phần đếm nhịp nằm trong `beat_tracker.py`, không có code ROS, nên kiểm thử riêng được.
+
+### 4. Đọc launch file
+
+<Code code={launchFile} lang="python" title="ros2_ws/src/pai_basics/launch/heartbeat.launch.py" />
+
+Tham số launch ở dạng văn bản, nên `ParameterValue` đổi `rate_hz` thành số trước khi node nhận.
+
+### 5. Tự xem bên trong
+
+Khởi động hệ thống ở một terminal:
+
+```bash
+source ros2_ws/install/setup.bash
+ros2 launch pai_basics heartbeat.launch.py rate_hz:=10.0
+```
+
+Ở terminal thứ hai, hỏi ROS xem đang chạy gì:
+
+```bash
+source ros2_ws/install/setup.bash
+ros2 node list
+ros2 topic info /heartbeat
+ros2 topic hz /heartbeat
+ros2 param get /heartbeat rate_hz
+ros2 service call /monitor/reset std_srvs/srv/Trigger
+```
+
+`ros2 topic info` phải hiện `Publisher count: 1` và `Subscription count: 1`, còn `ros2 topic hz` khoảng 10. Nhấn Ctrl+C để dừng.
+
+### 6. Chạy test
+
+```bash
+just test
+```
+
+Package có ba loại test: kiểm tra lint, unit test phần đếm nhịp, và một test khởi động launch file thật rồi giao tiếp với cả hai node. Test cuối dùng domain ID riêng nên các chương trình ROS 2 khác trên máy không làm nhiễu được.
+
+### Bài tập
+
+Có bốn bài tập trong `lessons/01-ros2-essentials/exercises.md`, lời giải ở `solutions.md`. Trong đó có một bài mà đổi parameter báo thành công nhưng không có tác dụng gì. Hãy thử tìm lý do trước khi đọc lời giải.
+
+## Lỗi thường gặp
+
+| Triệu chứng | Nguyên nhân | Cách sửa |
+| --- | --- | --- |
+| `Package 'pai_basics' not found` | Terminal này chưa source workspace | `source ros2_ws/install/setup.bash` |
+| `ros2 topic hz` chờ mãi | Hai terminal dùng `ROS_DOMAIN_ID` khác nhau | Dùng cùng một giá trị |
+| `Node not found` ngay sau khi khởi động | Quá trình discovery chưa xong | Chờ một chút rồi thử lại |

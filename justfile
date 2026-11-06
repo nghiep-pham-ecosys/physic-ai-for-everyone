@@ -28,8 +28,12 @@ lesson NN:
         echo "error: lesson {{NN}} does not exist yet (no lessons/{{NN}}-*/ directory)." >&2
         exit 1
     fi
-    echo "error: found ${dirs[0]}, but no lesson runner is defined yet." >&2
-    exit 1
+    if [ ! -f "${dirs[0]}run.sh" ]; then
+        echo "error: ${dirs[0]}run.sh does not exist." >&2
+        exit 1
+    fi
+    just build
+    bash "${dirs[0]}run.sh"
 
 # Remove colcon build, install and log directories
 clean:
