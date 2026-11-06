@@ -15,7 +15,7 @@ export default defineConfig({
       },
       // Fails the build on broken internal links.
       plugins: [starlightLinksValidator()],
-      // Architecture §5. Lessons and Project groups are added when they have pages.
+      // Architecture §5. The Lessons group is added when it has pages.
       sidebar: [
         {
           label: 'Start here',
@@ -26,6 +26,11 @@ export default defineConfig({
           label: 'Reference',
           translations: { vi: 'Tham khảo' },
           items: ['reference/glossary'],
+        },
+        {
+          label: 'Project',
+          translations: { vi: 'Dự án' },
+          items: ['project/roadmap'],
         },
       ],
     }),
