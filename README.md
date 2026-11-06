@@ -15,8 +15,8 @@ Starlight documentation site.
 
 ### Status
 
-**Phase 0 — in progress.** The repository is being set up; there are no
-lessons yet.
+**Phase 0 is done (`v0.1.0`).** The repository, development environment, CI
+and site are in place; there are no lessons yet.
 
 ### What is in this repository
 
@@ -75,7 +75,8 @@ tài liệu Astro Starlight.
 
 ### Trạng thái
 
-**Phase 0 — đang thực hiện.** Repo đang được dựng khung; chưa có bài học nào.
+**Phase 0 đã xong (`v0.1.0`).** Repo, môi trường phát triển, CI và site đã sẵn
+sàng; chưa có bài học nào.
 
 ### Repo này có gì
 

@@ -6,7 +6,7 @@ Lộ trình kéo dài 12 tháng, chia thành bảy giai đoạn.
 
 | Giai đoạn | Tuần | Nội dung | Trạng thái |
 | --- | --- | --- | --- |
-| P0: Nền móng | 1–2 | Repo, giấy phép, devcontainer, CI, site Starlight, giáo trình | Đang thực hiện |
+| P0: Nền móng | 1–2 | Repo, giấy phép, devcontainer, CI, site Starlight, giáo trình | Đã xong (`v0.1.0`) |
 | P1: Thân robot | 3–8 | Cơ bản về ROS 2, URDF/xacro, TF, cảm biến, thế giới Gazebo | Đã lên kế hoạch |
 | P2: Bộ não robot: Điều hướng | 9–16 | Odometry, SLAM, AMCL, Nav2, behavior tree | Đã lên kế hoạch |
 | P3: Đôi mắt robot: Nhận thức | 17–24 | Camera trên GPU cloud, OpenCV, phát hiện vật thể, độ sâu, hợp nhất cảm biến | Đã lên kế hoạch |

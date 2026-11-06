@@ -6,7 +6,7 @@ The roadmap covers 12 months, split into seven phases.
 
 | Phase | Weeks | Content | Status |
 | --- | --- | --- | --- |
-| P0: Foundation | 1–2 | Repository, licenses, devcontainer, CI, Starlight site, curriculum | In progress |
+| P0: Foundation | 1–2 | Repository, licenses, devcontainer, CI, Starlight site, curriculum | Done (`v0.1.0`) |
 | P1: Robot Body | 3–8 | ROS 2 basics, URDF/xacro, TF, sensors, Gazebo world | Planned |
 | P2: Robot Brain: Navigation | 9–16 | Odometry, SLAM, AMCL, Nav2, behavior trees | Planned |
 | P3: Robot Eyes: Perception | 17–24 | Camera on GPU cloud, OpenCV, detection, depth, sensor fusion | Planned |
