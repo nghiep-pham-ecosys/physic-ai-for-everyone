@@ -7,8 +7,7 @@ site, English default + Vietnamese (ADR-2); code Apache-2.0, content CC BY 4.0
 
 ## Roles
 - Nghiep: owner. Decides, approves, merges, sets tasks to Done.
-- Claude (claude.ai): designs — specs, briefs, ADRs.
-- You (Claude Code): execute briefs. You never decide scope.
+- You (Claude Code): write specs, briefs and ADRs, and execute them. Nghiep decides scope.
 
 ## Notion workflow (source of truth)
 - Workspace: "Physical AI for Everyone" (id <notion-id>).
@@ -17,10 +16,11 @@ site, English default + Vietnamese (ADR-2); code Apache-2.0, content CC BY 4.0
 - Lessons DB: <notion-id> · Decisions DB:
   <notion-id> · References DB: <notion-id>.
 - Architecture page: <notion-id>.
-- Work only on a task Nghiep names, with Status = Ready and Owner = Claude Code.
-- Read only that task page plus the Lesson / Decisions / Architecture pages it links.
-- Allowed Notion writes: Status (Ready → In Progress → In Review, or → Blocked),
-  Branch, PR, and comments. Never edit page bodies. Never set Done.
+- Work only on a task or lesson Nghiep names.
+- Read that page plus the Lesson / Decisions / Architecture / Templates pages it needs.
+- Allowed Notion writes: Status (up to In Review, or → Blocked), Branch, PR, comments,
+  and the body of task and lesson pages you own. Set Done or Published only when
+  Nghiep says so.
 - If the brief is wrong, ambiguous or missing information: comment the question
   on the task, set Status = Blocked, and stop.
 
@@ -31,7 +31,6 @@ site, English default + Vietnamese (ADR-2); code Apache-2.0, content CC BY 4.0
 - Never weaken .claude/settings.json or .mcp.json. Editing .claude/settings.json
   reloads MCP live: tell Nghiep to restart the session afterwards.
 - Never authenticate any plugin:design:* MCP server in this repo.
-- This repo must not be opened through the Claude Desktop app's Code tab.
 
 ## Truthfulness
 - Never invent numbers (dimensions, masses, sensor specs, timings, sizes).
@@ -58,6 +57,8 @@ site, English default + Vietnamese (ADR-2); code Apache-2.0, content CC BY 4.0
 ## Commands
 - Task runner is `just` (defined in PAI-18): `just build`, `just test`,
   `just lesson NN`, `just site-dev`, `just site-build`.
+- `just lesson NN` builds, then runs `lessons/NN-*/run.sh`, which must exit non-zero
+  on failure and need no GUI.
 - Until the devcontainer exists (PAI-17), state every command you run.
 
 ## Content rules
@@ -69,8 +70,9 @@ site, English default + Vietnamese (ADR-2); code Apache-2.0, content CC BY 4.0
   then Vietnamese.
 
 ## Tóm tắt tiếng Việt
-- Chỉ làm task Nghiệp chỉ định, đang Ready, owner là Claude Code; đúng phạm vi brief.
-- Notion: chỉ được đổi Status/Branch/PR và comment; không sửa thân trang, không đặt Done.
+- Claude Code viết cả spec, brief, ADR và thực thi; Nghiệp quyết định phạm vi.
+- Chỉ làm task hoặc bài Nghiệp chỉ định, đúng phạm vi.
+- Notion: được đổi Status/Branch/PR, comment và sửa thân trang task, bài mình phụ trách; chỉ đặt Done hoặc Published khi Nghiệp bảo.
 - Brief sai hoặc thiếu: comment, chuyển Blocked, dừng.
 - Không bịa số liệu (ghi OPEN); không dùng tài liệu của công ty nào; không chép nguồn có license không tương thích.
 - Không push thẳng main, không merge PR. Mọi bài phải chạy được headless.
