@@ -3,6 +3,7 @@
   "permissions": {
     "deny": [
       "mcp__claude_ai_*",
+      "mcp__plugin_design_*",
       "mcp__notion__notion-delete-pages",
       "mcp__notion__notion-delete-databases",
       "mcp__notion__notion-move-pages",
@@ -14,5 +15,25 @@
       "mcp__notion__notion-fetch",
       "mcp__notion__notion-query-data-sources"
     ]
-  }
+  },
+  "deniedMcpServers": [
+    {
+      "serverUrl": "https://mcp.slack.com/*"
+    },
+    {
+      "serverUrl": "https://mcp.figma.com/*"
+    },
+    {
+      "serverUrl": "https://mcp.linear.app/*"
+    },
+    {
+      "serverUrl": "https://mcp.asana.com/*"
+    },
+    {
+      "serverUrl": "https://mcp.atlassian.com/*"
+    },
+    {
+      "serverUrl": "https://mcp.intercom.com/*"
+    }
+  ]
 }
