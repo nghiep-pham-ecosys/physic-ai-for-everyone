@@ -28,7 +28,11 @@ and site are in place; there are no lessons yet.
 | `CONTRIBUTING.md` | How to contribute |
 | `CODE_OF_CONDUCT.md` | Contributor Covenant 2.1 |
 | `CLAUDE.md` | Working rules for the Claude Code assistant |
-| `.github/` | Pull request and issue templates |
+| `.github/` | CI workflows, pull request and issue templates |
+| `docker/`, `.devcontainer/` | CPU development image and VS Code devcontainer |
+| `justfile` | Task runner: `just build`, `just test`, `just site-dev`, `just site-build` |
+| `ros2_ws/` | ROS 2 workspace |
+| `site/` | Astro Starlight website (EN/VI) |
 
 ### Setup
 
@@ -88,7 +92,11 @@ sàng; chưa có bài học nào.
 | `CONTRIBUTING.md` | Hướng dẫn đóng góp |
 | `CODE_OF_CONDUCT.md` | Bộ quy tắc ứng xử Contributor Covenant 2.1 |
 | `CLAUDE.md` | Quy tắc làm việc cho trợ lý Claude Code |
-| `.github/` | Mẫu pull request và issue |
+| `.github/` | Workflow CI, mẫu pull request và issue |
+| `docker/`, `.devcontainer/` | Image phát triển CPU và devcontainer cho VS Code |
+| `justfile` | Công cụ chạy lệnh: `just build`, `just test`, `just site-dev`, `just site-build` |
+| `ros2_ws/` | Workspace ROS 2 |
+| `site/` | Website Astro Starlight (EN/VI) |
 
 ### Cài đặt
 
