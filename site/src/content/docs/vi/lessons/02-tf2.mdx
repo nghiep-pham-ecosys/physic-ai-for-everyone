@@ -1,0 +1,178 @@
+---
+title: 'Bài 02: Hệ tọa độ và TF2'
+description: Phép biến đổi cứng, các frame chuẩn của robot di động, và cách tf2 theo dõi chúng.
+---
+
+import { Code } from '@astrojs/starlight/components';
+import rigid2d from '../../../../../../ros2_ws/src/pai_basics/pai_basics/rigid2d.py?raw';
+import circleBroadcaster from '../../../../../../ros2_ws/src/pai_basics/pai_basics/circle_broadcaster.py?raw';
+import sensorLocator from '../../../../../../ros2_ws/src/pai_basics/pai_basics/sensor_locator.py?raw';
+import launchFile from '../../../../../../ros2_ws/src/pai_basics/launch/frames.launch.py?raw';
+
+**Sau bài này bạn có thể** giải thích phép biến đổi cứng, ghép các phép biến đổi bằng tay, nêu các frame chuẩn của robot di động, phát transform tĩnh và động, tra cứu transform, và xem cây TF.
+
+**Bạn cần** học xong [Bài 01](/vi/lessons/01-ros2-essentials/). Không cần GPU.
+
+## Lý thuyết
+
+**Vì sao cần frame.** Cảm biến báo những gì nó thấy so với chính nó. Muốn dùng trên robot, bạn phải đổi sang vị trí của robot, rồi sang bản đồ. Mỗi góc nhìn đó là một hệ tọa độ, gọi là frame.
+
+**Phép biến đổi cứng.** Đi từ frame này sang frame kia cần một phép quay và một phép tịnh tiến. Hai phép đó tạo thành chuyển động cứng, giữ nguyên khoảng cách và góc. Trong mặt phẳng, có thể viết thành ma trận 3×3, với `θ` là góc quay và `(x, y)` là tịnh tiến:
+
+```text
+    | cos θ  -sin θ   x |
+T = | sin θ   cos θ   y |
+    |   0       0     1 |
+```
+
+([Modern Robotics](https://hades.mech.northwestern.edu/index.php/Modern_Robotics), chương 3, trình bày đầy đủ cho không gian 3D.)
+
+**Ghép phép biến đổi.** Nếu biết frame b trong frame a, và frame c trong frame b, thì nhân lại sẽ được frame c trong frame a:
+
+```text
+T_ac = T_ab · T_bc
+```
+
+Thứ tự rất quan trọng: đi rồi quay khác với quay rồi đi. Test `test_order_of_composition_matters` chứng minh điều này.
+
+**Quy ước.** ROS dùng frame thuận tay phải. Trên robot, x hướng về trước, y sang trái, z lên trên. Khoảng cách tính bằng mét, góc tính bằng radian. ([REP-103](https://www.ros.org/reps/rep-0103.html))
+
+**Các frame chuẩn.** [REP-105](https://www.ros.org/reps/rep-0105.html) đặt tên các frame của robot di động:
+
+| Frame | Ý nghĩa | Đặc điểm |
+| --- | --- | --- |
+| `base_link` | Gắn cứng vào thân robot | Di chuyển cùng robot |
+| `odom` | Cố định với thế giới, tính từ nguồn như odometry bánh xe | Mượt, không nhảy, nhưng trôi dần theo thời gian |
+| `map` | Cố định với thế giới, trục z hướng lên | Ít trôi, nhưng có thể nhảy |
+
+Mỗi frame có đúng một parent, nên chúng tạo thành cây: `map` → `odom` → `base_link`.
+
+**tf2.** tf2 là thư viện của ROS để theo dõi các frame theo thời gian. Nó lưu frame dưới dạng cây, có đệm theo thời gian, và biến đổi dữ liệu giữa hai frame bất kỳ. Mọi thành phần ROS 2 đều dùng được thông tin này. ([tf2](https://docs.ros.org/en/jazzy/Concepts/Intermediate/About-Tf2.html))
+
+**Tĩnh và động.** Cảm biến bắt vít vào robot không bao giờ di chuyển so với robot, nên một transform tĩnh là đủ. Bản thân robot di chuyển, nên transform của nó phải được phát liên tục. ([static broadcaster](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Tf2/Writing-A-Tf2-Static-Broadcaster-Py.html), [broadcaster](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Tf2/Writing-A-Tf2-Broadcaster-Py.html))
+
+**Quaternion.** tf2 lưu phép quay bằng quaternion, gồm bốn số `(x, y, z, w)`, không lưu bằng góc. ([Quaternion fundamentals](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Tf2/Quaternion-Fundamentals.html)) Khi chỉ quay quanh trục z, x và y bằng 0, `z = sin(θ/2)` và `w = cos(θ/2)`.
+
+## Thuật ngữ
+
+| Thuật ngữ | Ý nghĩa |
+| --- | --- |
+| Frame | Một góc nhìn: một gốc tọa độ và ba trục |
+| Transform | Vị trí và hướng của frame này so với frame kia |
+| Parent / child | Trong transform, child được mô tả bên trong parent |
+| Cây TF | Tất cả các frame, nối lại sao cho mỗi frame có một parent |
+| Broadcaster | Phát transform |
+| Listener / buffer | Nhận và lưu transform |
+| Lookup | Hỏi tf2 transform giữa hai frame |
+| Transform tĩnh | Transform không bao giờ thay đổi |
+| Odometry | Ước lượng chuyển động từ các nguồn như bánh xe; có trôi |
+| Yaw | Góc quay quanh trục z |
+| Quaternion | Bốn số mô tả một phép quay |
+
+## Giải thích dễ hiểu
+
+Giả sử bạn của bạn nói "chìa khóa ở trước mặt tôi 20 cm". Câu đó vô dụng cho đến khi bạn biết người đó đang đứng đâu và nhìn về hướng nào.
+
+- Chìa khóa trước mặt người bạn: **cảm biến** nhìn thấy vật.
+- Chỗ đứng của người bạn trong phòng: **`base_link` trong `odom`**.
+- Vị trí căn phòng trong tòa nhà: **`odom` trong `map`**.
+
+Muốn tìm chìa khóa trong tòa nhà, hãy nối ba thông tin đó. Việc nối này chính là ghép phép biến đổi, và tf2 làm thay bạn.
+
+Vì sao cần cả `odom` lẫn `map`? `odom` giống như tự đếm bước: mượt, nhưng sai số nhỏ cứ cộng dồn. `map` giống như nhìn biển chỉ dẫn trên tường: sửa được sai số, nhưng vị trí có thể nhảy đột ngột.
+
+## Thực hành
+
+### 1. Chạy hệ thống hoàn chỉnh
+
+```bash
+just lesson 02
+```
+
+Bạn sẽ thấy:
+
+```text
+--- 1/4 tree
+found frame: map
+found frame: odom
+found frame: base_link
+found frame: sensor
+--- 2/4 static transform base_link -> sensor
+- Translation: [0.200, 0.000, 0.000]
+--- 3/4 dynamic transform odom -> base_link
+- Translation: [0.998, -0.058, 0.000]
+- Translation: [0.904, 0.428, 0.000]
+- Translation: [0.588, 0.809, 0.000]
+--- 4/4 sensor in map
+sensor in map: x=2.798 y=0.635
+PASS: lesson 02
+```
+
+Bước 2 không đổi, còn bước 3 thay đổi: đó là khác biệt giữa tĩnh và động. Các số thay đổi phụ thuộc thời gian nên của bạn sẽ khác.
+
+Các độ lệch trong bài chỉ để minh họa, không phải kích thước của `pai_bot`. Kích thước thật được chọn ở Bài 03.
+
+### 2. Đọc phần toán
+
+<Code code={rigid2d} lang="python" title="ros2_ws/src/pai_basics/pai_basics/rigid2d.py" />
+
+File này không có code ROS nên kiểm thử riêng được. Toán tử `@` trong Python là phép nhân ma trận.
+
+### 3. Đọc broadcaster động
+
+<Code code={circleBroadcaster} lang="python" title="ros2_ws/src/pai_basics/pai_basics/circle_broadcaster.py" />
+
+Hai mươi lần mỗi giây, node tính robot đang ở đâu trên vòng tròn và phát `odom` → `base_link`. Mỗi message có dấu thời gian, tf2 cần nó để lưu frame theo thời gian.
+
+Hiện chưa có robot thật. Node này đóng vai odometry bánh xe.
+
+### 4. Đọc listener
+
+<Code code={sensorLocator} lang="python" title="ros2_ws/src/pai_basics/pai_basics/sensor_locator.py" />
+
+`Buffer` lưu transform và `TransformListener` nạp dữ liệu vào đó. ([hướng dẫn listener](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Tf2/Writing-A-Tf2-Listener-Py.html)) Node này chỉ hỏi một câu, từ `map` đến `sensor`, và tf2 tự nối các frame ở giữa. Việc tra cứu có thể thất bại nên được đặt trong khối `try`.
+
+### 5. Đọc launch file
+
+<Code code={launchFile} lang="python" title="ros2_ws/src/pai_basics/launch/frames.launch.py" />
+
+Hai transform tĩnh dùng `static_transform_publisher` có sẵn, nên chúng ta không phải viết code.
+
+### 6. Tự xem cây frame
+
+Khởi động hệ thống ở một terminal:
+
+```bash
+source ros2_ws/install/setup.bash
+ros2 launch pai_basics frames.launch.py
+```
+
+Ở terminal thứ hai:
+
+```bash
+source ros2_ws/install/setup.bash
+ros2 run tf2_ros tf2_echo map sensor
+ros2 run tf2_tools view_frames
+```
+
+`tf2_echo` in transform liên tục; nhấn Ctrl+C để dừng. `view_frames` lưu sơ đồ cây thành file PDF trong thư mục hiện tại.
+
+### 7. Xem tf2 khớp với phép tính
+
+```bash
+just test
+```
+
+`test_tf2_agrees_with_composing_the_matrices_by_hand` hỏi tf2 transform `map` → `sensor`, tự nhân ba bước, rồi kiểm tra hai kết quả khớp nhau.
+
+### Bài tập
+
+Có bốn bài tập trong `lessons/02-tf2/exercises.md`, lời giải ở `solutions.md`. Bài tập 3 cho thấy một lỗi hoàn toàn không có thông báo. Hãy thử trước khi đọc lời giải.
+
+## Lỗi thường gặp
+
+| Triệu chứng | Nguyên nhân | Cách sửa |
+| --- | --- | --- |
+| `Invalid frame ID` hoặc `Could not find a connection` | Một mắt xích trong chuỗi chưa được phát | Chạy `view_frames` và tìm chỗ đứt |
+| Vị trí ngừng thay đổi, không có lỗi | Broadcaster đã dừng, giá trị cuối được dùng lại | Kiểm tra độ cũ của `header.stamp` |
+| Parent mới có vẻ không có tác dụng | Mỗi frame chỉ có một parent | Sửa lại cây, không thêm parent thứ hai |

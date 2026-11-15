@@ -39,4 +39,4 @@ jobs:
           --user "$(id -u):$(id -g)" -e HOME=/tmp
           -v "${{ github.workspace }}:/workspace" -w /workspace
           pai-dev:cpu
-          bash -c "just build && just test && just lesson 01"
+          bash -c "just build && just test && just lesson 01 && just lesson 02"

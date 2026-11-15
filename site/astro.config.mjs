@@ -25,7 +25,7 @@ export default defineConfig({
         {
           label: 'P1: Robot Body',
           translations: { vi: 'P1: Thân robot' },
-          items: ['lessons/01-ros2-essentials'],
+          items: ['lessons/01-ros2-essentials', 'lessons/02-tf2'],
         },
         {
           label: 'Reference',

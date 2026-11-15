@@ -43,6 +43,8 @@ setup(
         'console_scripts': [
             'heartbeat = pai_basics.heartbeat:main',
             'monitor = pai_basics.monitor:main',
+            'circle_broadcaster = pai_basics.circle_broadcaster:main',
+            'sensor_locator = pai_basics.sensor_locator:main',
         ],
     },
 )

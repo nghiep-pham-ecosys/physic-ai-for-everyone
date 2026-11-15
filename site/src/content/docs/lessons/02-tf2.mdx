@@ -1,0 +1,178 @@
+---
+title: 'Lesson 02: Coordinate frames and TF2'
+description: Rigid transforms, the standard mobile robot frames, and how tf2 keeps track of them.
+---
+
+import { Code } from '@astrojs/starlight/components';
+import rigid2d from '../../../../../ros2_ws/src/pai_basics/pai_basics/rigid2d.py?raw';
+import circleBroadcaster from '../../../../../ros2_ws/src/pai_basics/pai_basics/circle_broadcaster.py?raw';
+import sensorLocator from '../../../../../ros2_ws/src/pai_basics/pai_basics/sensor_locator.py?raw';
+import launchFile from '../../../../../ros2_ws/src/pai_basics/launch/frames.launch.py?raw';
+
+**After this lesson you can** explain a rigid transform, compose transforms by hand, name the standard frames of a mobile robot, publish static and moving transforms, look up a transform, and inspect the TF tree.
+
+**You need** [Lesson 01](/lessons/01-ros2-essentials/). No GPU.
+
+## Theory
+
+**Why frames exist.** A sensor reports what it sees relative to itself. To use that on a robot, you must convert it to the robot's position, and then to the map. Each of those points of view is a coordinate frame.
+
+**Rigid transform.** Moving between two frames takes one rotation and one translation. Together they form a rigid-body motion, which keeps distances and angles unchanged. In the plane, we can write one as a 3×3 matrix, where `θ` is the rotation and `(x, y)` the translation:
+
+```text
+    | cos θ  -sin θ   x |
+T = | sin θ   cos θ   y |
+    |   0       0     1 |
+```
+
+([Modern Robotics](https://hades.mech.northwestern.edu/index.php/Modern_Robotics), chapter 3, treats the full 3D case.)
+
+**Composition.** If you know frame b in frame a, and frame c in frame b, then multiplying gives frame c in frame a:
+
+```text
+T_ac = T_ab · T_bc
+```
+
+The order matters: moving then turning is not the same as turning then moving. The test `test_order_of_composition_matters` proves it.
+
+**Conventions.** ROS uses right-handed frames. On a robot, x points forward, y left, and z up. Distances are in meters and angles in radians. ([REP-103](https://www.ros.org/reps/rep-0103.html))
+
+**Standard frames.** [REP-105](https://www.ros.org/reps/rep-0105.html) names the frames of a mobile robot:
+
+| Frame | Meaning | Behavior |
+| --- | --- | --- |
+| `base_link` | Rigidly attached to the robot base | Moves with the robot |
+| `odom` | World-fixed, from a source such as wheel odometry | Smooth, with no jumps, but drifts over time |
+| `map` | World-fixed, with z pointing up | Should not drift much, but can jump |
+
+Each frame has exactly one parent, so they form a tree: `map` → `odom` → `base_link`.
+
+**tf2.** tf2 is the ROS library that keeps track of frames over time. It stores them as a tree, buffered in time, and transforms data between any two frames. Any ROS 2 component can use this information. ([tf2](https://docs.ros.org/en/jazzy/Concepts/Intermediate/About-Tf2.html))
+
+**Static and dynamic.** A sensor bolted to the robot never moves relative to it, so one static transform is enough. The robot itself moves, so its transform must be published again and again. ([static broadcaster](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Tf2/Writing-A-Tf2-Static-Broadcaster-Py.html), [broadcaster](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Tf2/Writing-A-Tf2-Broadcaster-Py.html))
+
+**Quaternions.** tf2 stores rotation as a quaternion, four numbers `(x, y, z, w)`, not as an angle. ([Quaternion fundamentals](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Tf2/Quaternion-Fundamentals.html)) For a rotation around z only, x and y are zero, `z = sin(θ/2)` and `w = cos(θ/2)`.
+
+## Terminology
+
+| Term | Meaning |
+| --- | --- |
+| Frame | A point of view: an origin plus three axes |
+| Transform | How one frame sits relative to another |
+| Parent / child | In a transform, the child is described inside the parent |
+| TF tree | All frames, connected so that each has one parent |
+| Broadcaster | Publishes transforms |
+| Listener / buffer | Receives and stores transforms |
+| Lookup | Asking tf2 for the transform between two frames |
+| Static transform | A transform that never changes |
+| Odometry | Estimating movement from sources such as wheels; it drifts |
+| Yaw | Rotation around the z axis |
+| Quaternion | Four numbers that describe a rotation |
+
+## Plain-language explanation
+
+Suppose a friend says "the keys are 20 cm in front of me". That is useless until you know where your friend is standing and which way they face.
+
+- The keys in front of your friend: the **sensor** seeing something.
+- Your friend's place in the room: **`base_link` in `odom`**.
+- The room's place in the building: **`odom` in `map`**.
+
+To find the keys in the building, chain the three facts. That chaining is composition, and tf2 does it for you.
+
+Why both `odom` and `map`? `odom` is like counting your own steps: smooth, but small errors add up. `map` is like checking a sign on the wall: it can correct the error, but your position may suddenly jump.
+
+## Hands-on
+
+### 1. Run the finished system
+
+```bash
+just lesson 02
+```
+
+You should see:
+
+```text
+--- 1/4 tree
+found frame: map
+found frame: odom
+found frame: base_link
+found frame: sensor
+--- 2/4 static transform base_link -> sensor
+- Translation: [0.200, 0.000, 0.000]
+--- 3/4 dynamic transform odom -> base_link
+- Translation: [0.998, -0.058, 0.000]
+- Translation: [0.904, 0.428, 0.000]
+- Translation: [0.588, 0.809, 0.000]
+--- 4/4 sensor in map
+sensor in map: x=2.798 y=0.635
+PASS: lesson 02
+```
+
+Step 2 stays the same, while step 3 changes: that is the difference between static and dynamic. The moving numbers depend on timing, so yours will differ.
+
+The offsets in this lesson are teaching values, not the size of `pai_bot`. Its real dimensions are chosen in Lesson 03.
+
+### 2. Read the math
+
+<Code code={rigid2d} lang="python" title="ros2_ws/src/pai_basics/pai_basics/rigid2d.py" />
+
+This file has no ROS code, so you can test it alone. The `@` operator in Python multiplies matrices.
+
+### 3. Read the dynamic broadcaster
+
+<Code code={circleBroadcaster} lang="python" title="ros2_ws/src/pai_basics/pai_basics/circle_broadcaster.py" />
+
+Twenty times per second, it works out where the robot is on the circle and publishes `odom` → `base_link`. Each message carries a time stamp, which tf2 needs in order to keep frames over time.
+
+There is no real robot yet. This node stands in for wheel odometry.
+
+### 4. Read the listener
+
+<Code code={sensorLocator} lang="python" title="ros2_ws/src/pai_basics/pai_basics/sensor_locator.py" />
+
+The `Buffer` stores transforms and the `TransformListener` fills it. ([listener tutorial](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Tf2/Writing-A-Tf2-Listener-Py.html)) This node asks one question, `map` to `sensor`, and tf2 chains the frames in between. The lookup can fail, so it sits in a `try` block.
+
+### 5. Read the launch file
+
+<Code code={launchFile} lang="python" title="ros2_ws/src/pai_basics/launch/frames.launch.py" />
+
+The two static transforms use the ready-made `static_transform_publisher`, so they need no code of ours.
+
+### 6. Inspect the tree by hand
+
+Start the system in one terminal:
+
+```bash
+source ros2_ws/install/setup.bash
+ros2 launch pai_basics frames.launch.py
+```
+
+In a second terminal:
+
+```bash
+source ros2_ws/install/setup.bash
+ros2 run tf2_ros tf2_echo map sensor
+ros2 run tf2_tools view_frames
+```
+
+`tf2_echo` prints the transform repeatedly; press Ctrl+C to stop. `view_frames` saves a diagram of the tree as a PDF in the current folder.
+
+### 7. See that tf2 agrees with the math
+
+```bash
+just test
+```
+
+`test_tf2_agrees_with_composing_the_matrices_by_hand` asks tf2 for `map` → `sensor`, multiplies the three steps itself, and checks that the two results match.
+
+### Exercises
+
+Four exercises are in `lessons/02-tf2/exercises.md`, with answers in `solutions.md`. Exercise 3 shows a failure with no error message at all. Try it before you read the answer.
+
+## Common problems
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `Invalid frame ID` or `Could not find a connection` | A link in the chain is not being published | Run `view_frames` and find the gap |
+| Position stops changing, with no error | The broadcaster stopped, and the last value is reused | Check how old `header.stamp` is |
+| A new parent seems to have no effect | Each frame has only one parent | Fix the tree instead of adding a second parent |
