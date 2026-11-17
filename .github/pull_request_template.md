@@ -8,7 +8,7 @@ PAI-<n>: <!-- link to the Notion task -->
 
 ## Checklist
 
-- [ ] Branch is `pai-<n>-<slug>`; PR title is `PAI-<n>: <summary>`
+- [ ] Branch is `<type>/<n>-<slug>`; PR title is `<type>: <summary>` (pr-title check)
 - [ ] Changes stay within the task's scope
 - [ ] No invented numbers (unknown values marked OPEN)
 - [ ] Technical claims cite official docs or the References DB

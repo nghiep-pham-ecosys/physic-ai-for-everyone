@@ -9,9 +9,13 @@ Thank you for your interest in Physical AI for Everyone.
 ### Branches and pull requests
 
 - Never push to `main`. All changes go through a pull request.
-- Branch name: `pai-<n>-<slug>`, where `<n>` is the task number
-  (for example `pai-16-repo-skeleton`).
-- Pull request title: `PAI-<n>: <summary>`.
+- After cloning, run `git config core.hooksPath .githooks` once to enable the
+  pre-push hook (gitleaks blocks a push that contains a secret).
+- Branch name: `<type>/<n>-<slug>`, where `<n>` is the issue number
+  (for example `chore/17-hook-checks`).
+- Pull request title: `<type>: <summary>`, lower case, imperative, no trailing
+  period (for example `docs: add lesson 03 outline`). Types: `feat`, `fix`,
+  `chore`, `refactor`, `docs`, `test`, `ci`. The `pr-title` check enforces it.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)
   (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, …).
 - The maintainer reviews and merges pull requests.
@@ -43,9 +47,14 @@ Cảm ơn bạn đã quan tâm đến Physical AI for Everyone.
 ### Nhánh và pull request
 
 - Không push thẳng lên `main`. Mọi thay đổi đều đi qua pull request.
-- Tên nhánh: `pai-<n>-<slug>`, với `<n>` là số task
-  (ví dụ `pai-16-repo-skeleton`).
-- Tiêu đề pull request: `PAI-<n>: <tóm tắt>`.
+- Sau khi clone, chạy `git config core.hooksPath .githooks` một lần để bật hook
+  pre-push (gitleaks chặn push có chứa secret).
+- Tên nhánh: `<type>/<n>-<slug>`, với `<n>` là số issue
+  (ví dụ `chore/17-hook-checks`).
+- Tiêu đề pull request: `<type>: <tóm tắt>`, viết thường, thể mệnh lệnh, không
+  có dấu chấm cuối (ví dụ `docs: add lesson 03 outline`). Các type: `feat`,
+  `fix`, `chore`, `refactor`, `docs`, `test`, `ci`. Check `pr-title` kiểm tra
+  quy tắc này.
 - Commit message theo [Conventional Commits](https://www.conventionalcommits.org/)
   (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, …).
 - Maintainer review và merge pull request.

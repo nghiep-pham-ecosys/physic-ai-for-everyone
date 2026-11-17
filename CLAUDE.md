@@ -48,7 +48,7 @@ site, English default + Vietnamese (ADR-2); code Apache-2.0, content CC BY 4.0
 ## Repository conventions
 - Layout follows the Architecture page. ROS packages are named pai_*.
   Create directories only when a phase needs them.
-- Branch: pai-<n>-<slug>. PR title: "PAI-<n>: <summary>". Conventional Commits.
+- Branch: <type>/<n>-<slug>. PR title: "<type>: <summary>" (checked by pr-title). Conventional Commits.
 - Never push to main. Never merge PRs — Nghiep merges.
 - Every lesson must pass headless. GUI is optional, never required to pass.
 - ROS 2 checks: use `printenv ROS_DISTRO` and `ros2 pkg list`; `ros2 --version`
