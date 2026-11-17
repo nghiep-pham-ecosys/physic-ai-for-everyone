@@ -53,3 +53,23 @@ ROS_DOMAIN_ID=59 timeout 8 ros2 topic echo --once /heartbeat std_msgs/msg/UInt32
 
 - EN: Domain 60 receives nothing and `timeout` stops it (exit code 124). Domain 59 prints a message. Nodes on different domains cannot discover each other.
 - VI: Domain 60 không nhận được gì và bị `timeout` dừng (mã thoát 124). Domain 59 in ra một message. Các node khác domain không tìm thấy nhau.
+
+## Code exercises / Bài tập viết code
+
+- EN: The answers to exercises 5 to 7 are in `ros2_ws/src/pai_basics/pai_basics/lesson01_solutions.py`. `test/test_lesson01_solutions.py` checks them, and `just test` runs it in CI on every pull request.
+- VI: Lời giải bài 5 đến 7 nằm trong `ros2_ws/src/pai_basics/pai_basics/lesson01_solutions.py`. `test/test_lesson01_solutions.py` kiểm tra chúng, và `just test` chạy test này trong CI ở mọi pull request.
+
+## 5. A safe period / Chu kỳ an toàn
+
+- EN: The check is `not rate_hz > 0`, not `rate_hz <= 0`. Every comparison with `nan` is false, so `nan <= 0` is false and `nan` would slip through. `math.isinf` catches infinity, whose period would be 0.
+- VI: Phép kiểm là `not rate_hz > 0`, không phải `rate_hz <= 0`. Mọi phép so sánh với `nan` đều sai, nên `nan <= 0` là sai và `nan` sẽ lọt qua. `math.isinf` chặn vô cùng, vì chu kỳ của nó sẽ bằng 0.
+
+## 6. How much was lost / Mất bao nhiêu
+
+- EN: Every expected beat was either received or missed, so the ratio is `missed / (received + missed)`. Before any beat, nothing was expected and the answer is 0.0, not a division by zero. Example: beats 0, 1, 2, 5 give 4 received and 2 missed, so the ratio is 2/6.
+- VI: Mỗi nhịp mong đợi hoặc đã nhận, hoặc đã mất, nên tỉ lệ là `missed / (received + missed)`. Khi chưa có nhịp nào thì chưa mong đợi gì, kết quả là 0.0 chứ không phải lỗi chia cho 0. Ví dụ: các nhịp 0, 1, 2, 5 cho 4 nhịp nhận và 2 nhịp mất, nên tỉ lệ là 2/6.
+
+## 7. Count the restarts / Đếm số lần khởi động lại
+
+- EN: Two details matter. First, check for a restart before calling `super().update(seq)`, because the parent overwrites `last_seq`. Second, `BeatTracker.__init__` calls `reset()`, so overriding `reset()` to set `restarts = 0` also creates the counter. No `__init__` is needed.
+- VI: Có hai chi tiết quan trọng. Thứ nhất, kiểm tra khởi động lại trước khi gọi `super().update(seq)`, vì lớp cha ghi đè `last_seq`. Thứ hai, `BeatTracker.__init__` gọi `reset()`, nên ghi đè `reset()` để đặt `restarts = 0` cũng tạo luôn bộ đếm. Không cần viết `__init__`.
