@@ -35,7 +35,7 @@ export default defineConfig({
         {
           label: 'Project',
           translations: { vi: 'Dự án' },
-          items: ['project/roadmap'],
+          items: ['project/roadmap', 'project/lesson-03-plan'],
         },
       ],
     }),
