@@ -5,7 +5,7 @@ description: Goals, steps, exercises and CI checks for lesson 03, before any cod
 
 This page is a plan, not a lesson. It fixes the scope of lesson 03 before code is written. The lesson itself follows the usual four sections: Theory, Terminology, Plain-language explanation and Hands-on.
 
-**Status:** planned. No code exists yet. Simulation (Gazebo) is out of scope and comes in a later P1 lesson ([Roadmap](/project/roadmap/)).
+**Status:** planned. No code exists yet. Simulation (Gazebo) is out of scope and comes in a later P1 lesson ([Roadmap](/physic-ai-for-everyone/project/roadmap/)).
 
 ## Goals
 
@@ -14,10 +14,10 @@ After lesson 03 the learner can:
 1. Explain what a robot description is: links, joints, and the visual, collision and inertial parts of a link. ([URDF tutorials](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/URDF/URDF-Main.html))
 2. Name the joint types and say which ones move: `fixed`, `continuous`, `revolute`, `prismatic`, `floating` and `planar`. ([URDF joint](https://wiki.ros.org/urdf/XML/joint))
 3. Write a description with xacro: properties, simple math and macros, so that a number is written once. ([Using xacro](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/URDF/Using-Xacro-to-Clean-Up-a-URDF-File.html))
-4. Publish the description with `robot_state_publisher` and connect it to the TF tree from [Lesson 02](/lessons/02-tf2/). Fixed joints go to `/tf_static` once, and movable joints go to `/tf` when `joint_states` changes. ([robot_state_publisher](https://github.com/ros/robot_state_publisher))
+4. Publish the description with `robot_state_publisher` and connect it to the TF tree from [Lesson 02](/physic-ai-for-everyone/lessons/02-tf2/). Fixed joints go to `/tf_static` once, and movable joints go to `/tf` when `joint_states` changes. ([robot_state_publisher](https://github.com/ros/robot_state_publisher))
 5. Check a description headless: expand it, parse it, and test its tree, with no GUI.
 
-**Prerequisites:** [Lesson 01](/lessons/01-ros2-essentials/) and [Lesson 02](/lessons/02-tf2/). No GPU.
+**Prerequisites:** [Lesson 01](/physic-ai-for-everyone/lessons/01-ros2-essentials/) and [Lesson 02](/physic-ai-for-everyone/lessons/02-tf2/). No GPU.
 
 ## The robot
 

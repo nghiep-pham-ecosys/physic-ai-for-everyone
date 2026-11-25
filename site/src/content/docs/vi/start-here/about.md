@@ -21,4 +21,4 @@ Dự án xây dần một robot duy nhất, `pai_bot`, qua từng bài học, th
 
 ## Cách theo dõi tiến độ
 
-Trang [Lộ trình](/vi/project/roadmap/) cho biết trạng thái của từng giai đoạn. Mỗi giai đoạn hoàn thành được phát hành với một tag phiên bản riêng: `v0.1.0` cho P0, `v0.2.0` cho P1, và cứ thế tiếp tục.
+Trang [Lộ trình](/physic-ai-for-everyone/vi/project/roadmap/) cho biết trạng thái của từng giai đoạn. Mỗi giai đoạn hoàn thành được phát hành với một tag phiên bản riêng: `v0.1.0` cho P0, `v0.2.0` cho P1, và cứ thế tiếp tục.
