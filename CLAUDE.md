@@ -9,13 +9,8 @@ site, English default + Vietnamese (ADR-2); code Apache-2.0, content CC BY 4.0
 - Nghiep: owner. Decides, approves, merges, sets tasks to Done.
 - You (Claude Code): write specs, briefs and ADRs, and execute them. Nghiep decides scope.
 
-## Notion workflow (source of truth)
-- Workspace: "Physical AI for Everyone" (id <notion-id>).
-- Tasks DB: <notion-id>
-  (data source collection://<notion-id>).
-- Lessons DB: <notion-id> · Decisions DB:
-  <notion-id> · References DB: <notion-id>.
-- Architecture page: <notion-id>.
+## Task tracking
+- Issues and the org board on GitHub are the source of truth (`<repo>#<n>`).
 - Work only on a task or lesson Nghiep names.
 - Read that page plus the Lesson / Decisions / Architecture / Templates pages it needs.
 - Allowed Notion writes: Status (up to In Review, or → Blocked), Branch, PR, comments,
