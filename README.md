@@ -13,6 +13,12 @@ act. Lessons are written in English first, with a Vietnamese translation.
 Planned stack: ROS 2 Jazzy and Gazebo Harmonic on Ubuntu 24.04, with an Astro
 Starlight documentation site.
 
+### Website
+
+Read the course at <https://nghiep-pham-ecosys.github.io/physic-ai-for-everyone/>.
+The site in `site/` is built and deployed to GitHub Pages by
+`.github/workflows/pages.yml` on every push to `main`.
+
 ### Status
 
 **Phase 0 is done (`v0.1.0`).** The repository, development environment, CI
@@ -76,6 +82,12 @@ hành động. Bài học được viết bằng tiếng Anh trước, kèm bả
 
 Nền tảng dự kiến: ROS 2 Jazzy và Gazebo Harmonic trên Ubuntu 24.04, cùng trang
 tài liệu Astro Starlight.
+
+### Website
+
+Đọc giáo trình tại <https://nghiep-pham-ecosys.github.io/physic-ai-for-everyone/>.
+Site trong `site/` được build và deploy lên GitHub Pages bởi
+`.github/workflows/pages.yml` mỗi lần push lên `main`.
 
 ### Trạng thái
 

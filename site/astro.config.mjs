@@ -4,6 +4,10 @@ import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
 
 export default defineConfig({
+  // Served by GitHub Pages as a project site. Internal links in content must
+  // start with the base path; starlight-links-validator checks this.
+  site: 'https://nghiep-pham-ecosys.github.io',
+  base: '/physic-ai-for-everyone',
   integrations: [
     starlight({
       title: 'Physical AI for Everyone',

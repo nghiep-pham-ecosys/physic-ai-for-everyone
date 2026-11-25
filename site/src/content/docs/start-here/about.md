@@ -21,4 +21,4 @@ The project grows a single robot, `pai_bot`, lesson by lesson, instead of many d
 
 ## How to follow progress
 
-The [Roadmap](/project/roadmap/) shows the status of every phase. Each finished phase is released with its own version tag: `v0.1.0` for P0, `v0.2.0` for P1, and so on.
+The [Roadmap](/physic-ai-for-everyone/project/roadmap/) shows the status of every phase. Each finished phase is released with its own version tag: `v0.1.0` for P0, `v0.2.0` for P1, and so on.
